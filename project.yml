@@ -18,3 +18,4 @@ targets:
       path: HealthSync/Info.plist
     settings:
       INFOPLIST_FILE: HealthSync/Info.plist
+      CODE_SIGN_ENTITLEMENTS: HealthSync/HealthSync.entitlements
