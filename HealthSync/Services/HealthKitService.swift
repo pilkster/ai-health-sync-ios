@@ -148,9 +148,22 @@ final class HealthKitService: @unchecked Sendable {
     /// Current authorization status
     private(set) var authorizationStatus: HKAuthorizationStatus = .notDetermined
     
-    /// All read types we request access to
+    /// All read types we request access to (minimal set for now)
     private var readTypes: Set<HKSampleType> {
-        Set(HealthDataType.allCases.compactMap { $0.healthKitType })
+        var types: Set<HKSampleType> = []
+        if let steps = HKQuantityType.quantityType(forIdentifier: .stepCount) {
+            types.insert(steps)
+        }
+        if let activeEnergy = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) {
+            types.insert(activeEnergy)
+        }
+        if let heartRate = HKQuantityType.quantityType(forIdentifier: .heartRate) {
+            types.insert(heartRate)
+        }
+        if let weight = HKQuantityType.quantityType(forIdentifier: .bodyMass) {
+            types.insert(weight)
+        }
+        return types
     }
     
     /// Request authorization for all health data types
