@@ -101,6 +101,17 @@ enum HealthDataType: String, CaseIterable, Codable, Sendable {
         case .sleepAnalysis: return nil
         }
     }
+    
+    /// Whether this type uses cumulative (sum) vs discrete (average) statistics
+    var isCumulative: Bool {
+        switch self {
+        case .steps, .activeEnergy, .restingEnergy, .dietaryEnergy,
+             .protein, .carbohydrates, .fat, .fiber, .sugar, .water, .caffeine:
+            return true
+        case .weight, .heartRate, .workouts, .sleepAnalysis:
+            return false
+        }
+    }
 }
 
 /// Generic health data record for JSON serialization
@@ -240,7 +251,7 @@ final class HealthKitService: @unchecked Sendable {
             let query = HKStatisticsCollectionQuery(
                 quantityType: quantityType,
                 quantitySamplePredicate: predicate,
-                options: [.cumulativeSum, .discreteAverage],
+                options: type.isCumulative ? [.cumulativeSum] : [.discreteAverage],
                 anchorDate: startDate,
                 intervalComponents: interval
             )
