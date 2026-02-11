@@ -177,8 +177,8 @@ final class CloudSyncService: @unchecked Sendable {
         self.endpointURL = UserDefaults.standard.string(forKey: CloudSyncKeys.endpointURL) 
             ?? "https://health.aineko.com"
         self.autoSyncEnabled = UserDefaults.standard.bool(forKey: CloudSyncKeys.autoSyncEnabled)
-        self.syncDaysRange = UserDefaults.standard.integer(forKey: CloudSyncKeys.syncDaysRange)
-        if self.syncDaysRange == 0 { self.syncDaysRange = 7 }
+        let savedDaysRange = UserDefaults.standard.integer(forKey: CloudSyncKeys.syncDaysRange)
+        self.syncDaysRange = savedDaysRange == 0 ? 7 : savedDaysRange
         self.lastSyncTimestamp = UserDefaults.standard.object(forKey: CloudSyncKeys.lastSyncTimestamp) as? Date
         
         // Configure URL session
