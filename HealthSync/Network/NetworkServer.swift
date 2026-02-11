@@ -212,7 +212,9 @@ final class NetworkServer: @unchecked Sendable {
             
             // Handle new connections
             listener.newConnectionHandler = { [weak self] connection in
-                self?.handleNewConnection(connection)
+                Task { @MainActor in
+                    self?.handleNewConnection(connection)
+                }
             }
             
             // Start listening
@@ -272,13 +274,15 @@ final class NetworkServer: @unchecked Sendable {
         }
         
         connection.stateUpdateHandler = { [weak self] state in
-            switch state {
-            case .ready:
-                self?.receiveData(on: connection)
-            case .failed, .cancelled:
-                self?.removeConnection(connection)
-            default:
-                break
+            Task { @MainActor in
+                switch state {
+                case .ready:
+                    self?.receiveData(on: connection)
+                case .failed, .cancelled:
+                    self?.removeConnection(connection)
+                default:
+                    break
+                }
             }
         }
         
@@ -297,16 +301,18 @@ final class NetworkServer: @unchecked Sendable {
     /// Receive data from a connection
     private func receiveData(on connection: NWConnection) {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, isComplete, error in
-            guard let self = self else { return }
-            
-            if let data = data, !data.isEmpty {
-                self.handleRequest(data: data, connection: connection)
-            }
-            
-            if isComplete || error != nil {
-                self.removeConnection(connection)
-            } else {
-                self.receiveData(on: connection)
+            Task { @MainActor in
+                guard let self = self else { return }
+                
+                if let data = data, !data.isEmpty {
+                    self.handleRequest(data: data, connection: connection)
+                }
+                
+                if isComplete || error != nil {
+                    self.removeConnection(connection)
+                } else {
+                    self.receiveData(on: connection)
+                }
             }
         }
     }
