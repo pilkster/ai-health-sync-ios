@@ -1,6 +1,6 @@
 name: HealthSync
 options:
-  bundleIdPrefix: com.aineko
+  bundleIdPrefix: com.pilkster
   deploymentTarget:
     iOS: "17.0"
 settings:

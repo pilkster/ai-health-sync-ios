@@ -220,7 +220,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.aineko.HealthSync;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pilkster.HealthSync;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -301,7 +301,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.aineko.HealthSync;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pilkster.HealthSync;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
