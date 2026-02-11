@@ -221,7 +221,7 @@ struct LogEntryRow: View {
                 
                 Text(entry.relativeTimestamp)
                     .font(.caption2)
-                    .foregroundColor(.tertiary)
+                    .foregroundStyle(.tertiary)
             }
             
             Spacer()
