@@ -18,5 +18,9 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Health Sync needs access to your health data to sync it to your personal cloud dashboard for tracking and insights.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Health Sync may write health data back to Apple Health.</string>
 </dict>
 </plist>
