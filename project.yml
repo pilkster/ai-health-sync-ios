@@ -1,0 +1,20 @@
+name: HealthSync
+options:
+  bundleIdPrefix: com.aineko
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  SWIFT_VERSION: "6.0"
+  DEVELOPMENT_TEAM: ""
+targets:
+  HealthSync:
+    type: application
+    platform: iOS
+    sources:
+      - HealthSync
+    entitlements:
+      path: HealthSync/HealthSync.entitlements
+    info:
+      path: HealthSync/Info.plist
+    settings:
+      INFOPLIST_FILE: HealthSync/Info.plist

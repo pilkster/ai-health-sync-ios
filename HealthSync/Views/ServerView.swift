@@ -3,7 +3,7 @@
 //  HealthSync
 //
 //  Server status and control view.
-//  Shows server state, connected clients, and network info.
+//  Shows server state, connected clients, network info, and cloud sync.
 //
 
 import SwiftUI
@@ -18,6 +18,19 @@ struct ServerView: View {
     var body: some View {
         NavigationStack {
             List {
+                // Cloud Sync Section
+                Section {
+                    cloudSyncStatusRow
+                    cloudSyncButton
+                } header: {
+                    Text("Cloud Sync")
+                } footer: {
+                    if let cloudSync = services.cloudSyncService,
+                       let lastSync = cloudSync.lastSyncTimestamp {
+                        Text("Last synced: \(lastSync.formatted(date: .abbreviated, time: .shortened))")
+                    }
+                }
+                
                 // Server Status Section
                 Section {
                     serverStatusRow
@@ -235,6 +248,75 @@ struct ServerView: View {
                     .foregroundColor(.secondary)
             }
         }
+    }
+    
+    // MARK: - Cloud Sync
+    
+    private var cloudSyncStatusRow: some View {
+        HStack {
+            Image(systemName: cloudSyncStatusIcon)
+                .foregroundColor(cloudSyncStatusColor)
+                .font(.title2)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Cloud Sync")
+                    .font(.headline)
+                Text(services.cloudSyncService?.status.displayText ?? "Not configured")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            if case .syncing = services.cloudSyncService?.status {
+                ProgressView()
+            } else if case .success = services.cloudSyncService?.status {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+    
+    private var cloudSyncStatusIcon: String {
+        guard let cloudSync = services.cloudSyncService else { return "cloud" }
+        
+        switch cloudSync.status {
+        case .idle: return "cloud"
+        case .syncing: return "arrow.triangle.2.circlepath.circle"
+        case .success: return "cloud.fill"
+        case .error: return "exclamationmark.icloud.fill"
+        }
+    }
+    
+    private var cloudSyncStatusColor: Color {
+        guard let cloudSync = services.cloudSyncService else { return .gray }
+        
+        switch cloudSync.status {
+        case .idle: return .gray
+        case .syncing: return .blue
+        case .success: return .green
+        case .error: return .red
+        }
+    }
+    
+    private var cloudSyncButton: some View {
+        Button {
+            Task {
+                await services.cloudSyncService?.sync()
+            }
+        } label: {
+            HStack {
+                Image(systemName: "arrow.triangle.2.circlepath.icloud")
+                Text("Sync to Cloud")
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(.blue)
+        .disabled(services.cloudSyncService == nil || 
+                  services.cloudSyncService?.status == .syncing)
     }
     
     // MARK: - Actions

@@ -17,10 +17,26 @@ struct SettingsView: View {
     
     @State private var showingResetConfirmation = false
     @State private var showingCertificateInfo = false
+    @State private var cloudEndpoint: String = ""
+    @State private var autoSyncEnabled: Bool = false
+    @State private var syncDaysRange: Int = 7
     
     var body: some View {
         NavigationStack {
             List {
+                // Cloud Sync Section
+                Section {
+                    cloudSyncSettingsSection
+                } header: {
+                    Text("Cloud Sync")
+                } footer: {
+                    if let lastSync = services.cloudSyncService?.lastSyncTimestamp {
+                        Text("Last synced: \(lastSync.formatted(date: .long, time: .shortened))")
+                    } else {
+                        Text("Configure cloud sync to upload health data to your server.")
+                    }
+                }
+                
                 // Certificate Info Section
                 Section {
                     certificateInfoRow
@@ -116,6 +132,64 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("This action cannot be undone. All paired devices will need to re-pair.")
+            }
+            .onAppear {
+                loadCloudSyncSettings()
+            }
+        }
+    }
+    
+    private func loadCloudSyncSettings() {
+        if let cloudSync = services.cloudSyncService {
+            cloudEndpoint = cloudSync.endpointURL
+            autoSyncEnabled = cloudSync.autoSyncEnabled
+            syncDaysRange = cloudSync.syncDaysRange
+        }
+    }
+    
+    // MARK: - Cloud Sync Settings
+    
+    @ViewBuilder
+    private var cloudSyncSettingsSection: some View {
+        // Endpoint URL
+        HStack {
+            Text("Endpoint")
+            Spacer()
+            TextField("https://health.aineko.com", text: $cloudEndpoint)
+                .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 200)
+                .autocapitalization(.none)
+                .disableAutocorrection(true)
+                .onChange(of: cloudEndpoint) { _, newValue in
+                    services.cloudSyncService?.endpointURL = newValue
+                }
+        }
+        
+        // Auto-sync toggle
+        Toggle("Auto-sync on Launch", isOn: $autoSyncEnabled)
+            .onChange(of: autoSyncEnabled) { _, newValue in
+                services.cloudSyncService?.autoSyncEnabled = newValue
+            }
+        
+        // Sync days range
+        Picker("Sync Period", selection: $syncDaysRange) {
+            Text("3 days").tag(3)
+            Text("7 days").tag(7)
+            Text("14 days").tag(14)
+            Text("30 days").tag(30)
+        }
+        .onChange(of: syncDaysRange) { _, newValue in
+            services.cloudSyncService?.syncDaysRange = newValue
+        }
+        
+        // Sync status
+        if let cloudSync = services.cloudSyncService {
+            HStack {
+                Text("Status")
+                Spacer()
+                Text(cloudSync.status.displayText)
+                    .foregroundColor(cloudSync.status.isError ? .red : .secondary)
             }
         }
     }

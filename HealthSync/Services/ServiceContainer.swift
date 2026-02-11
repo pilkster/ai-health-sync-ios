@@ -3,7 +3,7 @@
 //  HealthSync
 //
 //  Dependency injection container that manages all app services.
-//  Provides centralized access to HealthKit, networking, and security services.
+//  Provides centralized access to HealthKit, networking, security, and cloud sync services.
 //
 
 import Foundation
@@ -27,6 +27,9 @@ final class ServiceContainer: Sendable {
     /// Audit logging service
     private(set) var auditService: AuditService?
     
+    /// Cloud sync service for remote data upload
+    private(set) var cloudSyncService: CloudSyncService?
+    
     /// Whether services have been initialized
     private(set) var isInitialized = false
     
@@ -48,6 +51,11 @@ final class ServiceContainer: Sendable {
         let health = HealthKitService()
         self.healthService = health
         
+        // Initialize cloud sync service
+        let cloudSync = CloudSyncService()
+        cloudSync.configure(healthService: health)
+        self.cloudSyncService = cloudSync
+        
         // Initialize network server with dependencies
         let server = NetworkServer(
             securityService: security,
@@ -57,5 +65,12 @@ final class ServiceContainer: Sendable {
         self.networkServer = server
         
         isInitialized = true
+        
+        // Auto-sync if enabled
+        if cloudSync.autoSyncEnabled {
+            Task {
+                await cloudSync.sync()
+            }
+        }
     }
 }
